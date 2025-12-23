@@ -1,64 +1,123 @@
-## Fraud Detection App
+<h1 align="center">🛡️ Fraud Detection Project — Streamlit + ML</h1>
 
-Interactive Streamlit dashboard for stress-testing PaySim-style ledgers against trained fraud models. Operators can plug in transaction narratives, inspect model calls, and share audit-ready evidence without touching notebooks.
+<p align="center">
+	<a href="https://www.python.org/"><img src="https://img.shields.io/badge/Made%20with-Python-blue?logo=python"></a>
+	<a href="https://scikit-learn.org/"><img src="https://img.shields.io/badge/Framework-Scikit--learn-orange?logo=scikitlearn"></a>
+	<a href="https://xgboost.readthedocs.io/"><img src="https://img.shields.io/badge/Model-XGBoost-2b6cb0"></a>
+	<a href="https://streamlit.io/"><img src="https://img.shields.io/badge/UI-Streamlit-ff4b4b?logo=streamlit"></a>
+	<img src="https://img.shields.io/badge/Status-Completed-success">
+</p>
 
-### Highlights
-- Scenario builder mirrors the PaySim schema (`type`, `amount`, `oldbalanceOrg`, etc.) so CSV rows can be pasted in directly.
-- Model loader auto-detects bundled artifacts (logistic regression, XGBoost, generic pickle). Drop your latest pipeline next to `Fraud_dectection.py` and the UI picks it up on boot.
-- Probability call-outs, progress bars, and helper text translate every prediction into plain language for fraud analysts.
+<p align="center">
+	<img src="img.png" alt="Fraud Detection App" width="900" />
+</p>
 
-### Repo Layout
-| Path | Purpose |
-| --- | --- |
-| `Fraud_dectection.py` | Streamlit UI + inference workflow. |
-| `Fraud_Detection.ipynb` | Notebook used to explore PaySim data and train/export models. |
-| `AIML Dataset.csv` | Sample ledger sourced from PaySim. |
-| `xgb_fraud_model.pxl`, `fraud_detection_model.pkl`, `logistic_fraud_model.joblib` | Candidate model artifacts searched at runtime. |
+> 🧠 An end-to-end fraud detection system: train a model on PaySim-style transactions, export deployable artifacts, and use a Streamlit dashboard to test transactions in seconds.
 
-### Requirements
-- Windows/macOS/Linux with Python 3.10+ (tested on 3.13).
-- Packages: `streamlit`, `pandas`, `joblib`, plus the libraries baked into your serialized model (e.g., `xgboost`, `scikit-learn`).
+---
 
-Install the basics:
+## 📘 Project Overview
+
+This repository contains:
+
+- A full training notebook (EDA → preprocessing → training → evaluation → export)
+- Saved model artifacts for reuse in apps/APIs
+- A Streamlit UI to enter transaction details and instantly see the fraud verdict + probability
+
+---
+
+## 🎯 Key Features
+
+- End-to-end ML workflow with clean, reproducible steps
+- **99.99% accuracy** reported for the trained model
+- Exported models (`.pkl` / `.joblib`) for easy deployment
+- Streamlit “Scenario Builder” UI for interactive fraud checks
+- Displays a simple result message: verdict + probability
+
+---
+
+## 📂 Repository Contents
+
+| File | Description |
+|------|-------------|
+| `Fraud_Detection.ipynb` | Full notebook workflow: preprocessing → modeling → evaluation → export. |
+| `Fraud_detection.py` | Streamlit app for live transaction scoring. |
+| `fraud_detection_model.pkl` | Saved model (pickle). |
+| `xgb_fraud_model.joblib` | Saved model (joblib). |
+
+---
+
+## 🔗 Dataset
+
+Dataset used (not uploaded to this repo):
+
+- Kaggle: https://www.kaggle.com/datasets/amanalisiddiqui/fraud-detection-dataset/data
+
+---
+
+## 🌐 Live Project Link 
+
+   Live Demo: https://frauds-detection-ml-project.streamlit.app/
+
+
+---
+
+## 🛠️ Technologies Used
+
+- Python
+- Pandas, NumPy
+- Scikit-learn
+- XGBoost
+- Joblib / Pickle
+- Streamlit
+- Jupyter Notebook
+
+---
+
+## ⚙️ How to Run the Streamlit App
+
 ```bash
 python -m pip install --upgrade pip
-python -m pip install streamlit pandas joblib
+python -m pip install streamlit pandas joblib scikit-learn xgboost
+python -m streamlit run Fraud_detection.py
 ```
 
-### Running the Dashboard
-1. Clone or copy this folder locally.
-2. Place at least one supported model file in the project root (`fraud_detection_model.pkl` is the default fallback).
-3. Start Streamlit from the project directory using the same interpreter that has Streamlit installed:
-	```bash
-	python -m streamlit run Fraud_dectection.py
-	```
-4. Open the provided `http://localhost:8502` link in your browser.
+---
 
-> **Tip:** On Windows Store versions of Python you may need the fully qualified interpreter path, e.g., `C:/Users/<user>/AppData/.../python3.13.exe -m streamlit run Fraud_dectection.py`.
+## ⚙️ How to Load the Model
 
-### Using the Scenario Builder
-1. Pick a transaction `type` (Payment, Transfer, Cash Out, Cash In, Debit).
-2. Enter the PaySim `amount` value and both origin/destination balances before/after the move.
-3. Click **Run Prediction**. The app renders:
-	- Model verdict (Fraudulent vs Legitimate).
-	- Probability sentence ("This transaction has XX.X% probability of being …").
-	- Progress bar + reference to the loaded model artifact.
-4. Tweak any field and submit again to run what-if checks.
+```python
+import joblib
 
-### Replacing / Updating Models
-1. Export your estimator with `joblib.dump()` or `pickle.dump()`.
-2. Name it to match an entry in `MODEL_CANDIDATES` inside `Fraud_dectection.py`, or edit that list to include your filename.
-3. Restart the Streamlit app—`load_model()` selects the first existing file.
+model = joblib.load("fraud_detection_model.pkl")
 
-### Extending the Project
-- **Feature engineering:** Update the notebook, retrain, and ensure preprocessing steps are encapsulated in the serialized pipeline.
-- **Batch scoring:** Convert `Fraud_dectection.py` logic into a function and map across CSV rows or integrate with an API.
-- **Audit logging:** Capture predictions plus user-entered metadata and send them to a database or CSV.
+# Example prediction
+pred = model.predict(X_new)
 
-### Troubleshooting
-- `streamlit : The term 'streamlit' is not recognized` → install Streamlit in the active environment or call it via `python -m streamlit`.
-- `Model prediction failed: ...` → verify the artifact expects the exact PaySim columns and that preprocessing is bundled inside the pipeline.
-- Blank probability text → your estimator lacks `predict_proba`; consider exporting a probabilistic model or handle decision functions manually.
+if hasattr(model, "predict_proba"):
+		prob = model.predict_proba(X_new)[:, 1]
+```
 
-### License & Credits
-Created by Sandeep M. for rapid, analyst-friendly experimentation on PaySim-like fraud scenarios. Use responsibly when testing with real customer data.
+---
+
+## 👨‍💻 Author
+
+**Sandeep Maurya**
+
+📧 [isandeeep06@gmail.com](mailto:isandeeep06@gmail.com)  
+🔗 [LinkedIn](https://www.linkedin.com/in/sandeepmaurya-datascientist)
+🌐 [Portfolio](https://isandeep06.github.io/)
+
+---
+
+## 🌟 Support
+
+If this project helped you:
+
+⭐ Star this repo  
+📢 Share it with others  
+💬 Open an issue for suggestions or improvements
+
+---
+
+> _“Good ML isn’t only about accuracy — it’s about reliability, clarity, and real-world usability.”_
